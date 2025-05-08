@@ -1,0 +1,7 @@
+/build
+
+*.exe
+
+/vcpkg_installed
+
+/.vscode

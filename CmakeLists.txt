@@ -1,0 +1,87 @@
+cmake_minimum_required(VERSION 3.10)
+project(HtmlEditor)
+
+set(CMAKE_CXX_STANDARD 17)
+
+####################### MODIFIFY ##################
+set(VCPKG_ROOT ${CMAKE_SOURCE_DIR}/vcpkg_installed)
+set(VCPKG_TARGET_TRIPLET "x64-windows")
+set(VCPKG_INSTALLED_DIR ${VCPKG_ROOT}/${VCPKG_TARGET_TRIPLET})
+###################################################
+
+include_directories(${CMAKE_SOURCE_DIR}/src)
+
+set(SRC_FILES
+    src/HtmlNode.cpp
+    src/Command.cpp
+    src/HtmlDoc.cpp
+    src/HtmlEditor.cpp
+    src/TagRegistry.cpp
+    src/Visitor.cpp
+)
+
+add_executable(HtmlEditor src/main.cpp ${SRC_FILES})
+
+# vcpkg dependency
+target_include_directories(HtmlEditor PRIVATE
+    ${VCPKG_INSTALLED_DIR}/include
+)
+target_link_directories(HtmlEditor PRIVATE
+    ${VCPKG_INSTALLED_DIR}/lib
+)
+target_link_libraries(HtmlEditor
+    PRIVATE
+    hunspell-1.7
+    gumbo
+)
+
+add_custom_command(TARGET HtmlEditor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+        ${VCPKG_INSTALLED_DIR}/bin/hunspell-1.7-0.dll
+        $<TARGET_FILE_DIR:HtmlEditor>
+)
+
+set_target_properties(HtmlEditor PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/release
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/release
+    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/release
+    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/release
+)
+
+################### TEST SECTION #####################
+
+file(GLOB TEST_SOURCES tests/*.cpp)
+
+foreach(TEST_FILE ${TEST_SOURCES})
+    # get test file's name
+    get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
+
+    # one exe for each test file
+    add_executable(${TEST_NAME} ${SRC_FILES} ${TEST_FILE})
+    
+    # vcpkg dependency
+    target_include_directories(${TEST_NAME} PRIVATE
+        ${VCPKG_INSTALLED_DIR}/include
+    )
+    target_link_directories(${TEST_NAME} PRIVATE
+        ${VCPKG_INSTALLED_DIR}/lib
+    )
+    target_link_libraries(${TEST_NAME}
+        PRIVATE
+        hunspell-1.7
+        gumbo
+    )
+
+    set_target_properties(${TEST_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/test
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/test
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/test
+        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/test
+    )
+
+    add_custom_command(TARGET ${TEST_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${VCPKG_INSTALLED_DIR}/bin/hunspell-1.7-0.dll
+            $<TARGET_FILE_DIR:${TEST_NAME}>
+    )
+endforeach()
