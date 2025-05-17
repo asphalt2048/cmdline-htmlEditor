@@ -71,7 +71,7 @@ void HtmlDoc::load(HtmlParserImple& parser){
     auto _idMap = idMap;
     idMap.clear();
 
-    if(!isIdsValid(result)){
+    if(!isNodeIdsValid(result)){
         delete result;
         idMap = _idMap;
         throw std::logic_error("Load a file with duplicate or unspecified id");
@@ -105,9 +105,9 @@ HtmlNode* HtmlDoc::findNodeById(const std::string& id) const{
     return nullptr;
 }
 
-bool HtmlDoc::isIdsValid(HtmlNode* node) const{
+bool HtmlDoc::isNodeIdsValid(HtmlNode* node) const{
     std::unordered_set<std::string> idSet;
-    return isIdsValidRecur(node, idSet);    
+    return isNodeIdsValidRecur(node, idSet);    
 }
 
 // TODO: what if somebody want to insert a node before a text node?
@@ -119,7 +119,7 @@ void HtmlDoc::insert(const std::string& id, HtmlNode* source){
     if(!source){
         throw std::logic_error("Try to insert a null node");
     }
-    if(!isIdsValid(source)){
+    if(!isNodeIdsValid(source)){
         throw std::logic_error("Try to insert a node with existing id");
     }
     // TODO: getParent always expects a Element node, but it returns a HtmlNode
@@ -151,7 +151,7 @@ void HtmlDoc::append(const std::string& id, HtmlNode* source){
     if(!source){
         throw std::logic_error("Try to append a null node");
     }
-    if(!isIdsValid(source)){
+    if(!isNodeIdsValid(source)){
         throw std::logic_error("Try to append a node with existing id");
     }
     parent->addChild(source);
@@ -177,7 +177,7 @@ void HtmlDoc::restore(HtmlNode* node){
     // A node to restore must have a valid parent still in tree
     if(!parent || !idMap.count(parent->getID()))
         return;
-    if(!isIdsValid(node))
+    if(!isNodeIdsValid(node))
         return;
     addNodesToMap(node);
     node->restore();
@@ -264,7 +264,7 @@ void HtmlDoc::removeNodesFromMap(HtmlNode* node){
     idMap.erase(id);
 }
 
-bool HtmlDoc::isIdsValidRecur(HtmlNode* node, std::unordered_set<std::string>& idSet) const{
+bool HtmlDoc::isNodeIdsValidRecur(HtmlNode* node, std::unordered_set<std::string>& idSet) const{
     if(!node || node->isText())
         return true;
     std::string id = node->getID();
@@ -282,7 +282,7 @@ bool HtmlDoc::isIdsValidRecur(HtmlNode* node, std::unordered_set<std::string>& i
         return false;
     idSet.insert(id);
     for(const auto& child : node->getChildren()){
-        if(!isIdsValidRecur(child, idSet))
+        if(!isNodeIdsValidRecur(child, idSet))
             return false;
     }
     return true;

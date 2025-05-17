@@ -23,7 +23,7 @@ void testIdMap(){
     HtmlDoc* doc = new HtmlDoc();
     doc->init();
     ElementNode* html = new ElementNode("html", "html");
-    assert(doc->isIdsValid(html) == false);
+    assert(doc->isNodeIdsValid(html) == false);
     delete doc;
     std::cout << "=========== test idMap passed! ==========" << std::endl;
 }

@@ -40,7 +40,7 @@ class HtmlDoc{
         std::stack<std::unique_ptr<Command>> undoStack;
         std::stack<std::unique_ptr<Command>> redoStack;
 
-        bool isIdsValidRecur(HtmlNode* node, std::unordered_set<std::string>& idSet) const;
+        bool isNodeIdsValidRecur(HtmlNode* node, std::unordered_set<std::string>& idSet) const;
         // simply add, no check
         void addNodesToMap(HtmlNode* node);
         void removeNodesFromMap(HtmlNode* node);
@@ -59,8 +59,8 @@ class HtmlDoc{
         bool getShowID() const;
         void setShowID(bool s);
 
-        // init the doc with a build-in format
-        void init();
+        
+        void init(); // init the doc with a build-in format
         void save();
         void load(HtmlParserImple& parser);
 
@@ -70,7 +70,7 @@ class HtmlDoc{
         // return the pointer to the HtmlNode with a given id, return nullptr if no node is found
         HtmlNode* findNodeById(const std::string& id) const;
 
-        bool isIdsValid(HtmlNode* node) const;
+        bool isNodeIdsValid(HtmlNode* node) const;
 
         // insert a node next to a given node. The new node will appear before that node
         void insert(const std::string& id, HtmlNode* source);
